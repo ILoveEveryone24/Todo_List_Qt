@@ -8,7 +8,11 @@
 #include <nlohmann/json.hpp>
 
 int main(int argc, char *argv[]) {
-	std::ifstream file("../todo.json");
+	QApplication app(argc, argv);
+
+	QString jsonFilePath = QCoreApplication::applicationDirPath() + "/todo.json";
+
+	std::ifstream file(jsonFilePath.toStdString());
 	if(!file){
 		std::cerr << "Could not open the file." << std::endl;	
 		return -1;
@@ -24,7 +28,6 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	QApplication app(argc, argv);
 	app.setStyle("Windows");
 
 	QWidget window;
