@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
 	app.setStyle("Windows");
 
 	QWidget window;
-	window.setWindowTitle("My Qt To-Do App");
+	window.setWindowTitle("To-Do App");
 	window.setWindowFlag(Qt::WindowStaysOnTopHint);
 	window.setFixedSize(400, 300);
 	window.setStyleSheet(
