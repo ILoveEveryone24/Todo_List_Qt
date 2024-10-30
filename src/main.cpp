@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <nlohmann/json.hpp>
+#include <cstdlib>
 
 int main(int argc, char *argv[]) {
 	QApplication app(argc, argv);
@@ -13,6 +14,30 @@ int main(int argc, char *argv[]) {
 	QString jsonFilePath = QCoreApplication::applicationDirPath() + "/todo.json";
 
 	std::ifstream file(jsonFilePath.toStdString());
+
+	if(argc == 2){
+		if(std::string(argv[1]) == "--edit"){
+			std::string command = "vim ";
+			command += jsonFilePath.toStdString();
+
+			int result = system(command.c_str());
+			if(result == 0){
+				std::cout << "File: " << jsonFilePath.toStdString() << " opened in VIM" << std::endl;	
+				return 0;
+			}
+			else{
+				std::cerr << "Failed to open file in VIM." << std::endl;	
+			}
+		}
+		else{
+			std::cerr << "Invalid flag: " << argv[1] << std::endl;
+			return -1;
+		}
+	}
+	else if(argc > 2){
+		return -1;	
+	}
+
 	if(!file){
 		std::cerr << "Could not open the file." << std::endl;	
 		return -1;

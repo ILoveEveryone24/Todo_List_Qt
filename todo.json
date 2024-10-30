@@ -11,6 +11,10 @@
 		{
 			"task": "Task 3",
 			"completed": true
+		},
+		{
+			"task": "Task 3",
+			"completed": true
 		}
 	]
 }
