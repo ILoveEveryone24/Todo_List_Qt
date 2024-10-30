@@ -3,3 +3,7 @@
 ```console
 $ sudo apt install nlohmann-json3-dev
 ```
+### To edit todo.json (VIM only for now):
+```console
+$ ./<executable> --edit
+```
