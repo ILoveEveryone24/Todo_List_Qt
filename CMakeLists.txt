@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(program LANGUAGES CXX)
+project(todo_list LANGUAGES CXX)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets)
 
@@ -11,10 +11,10 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-add_executable(program
+add_executable(todo_list
     src/main.cpp
 )
 
-target_include_directories(program PRIVATE include)
+target_include_directories(todo_list PRIVATE include)
 
-target_link_libraries(program Qt6::Core Qt6::Widgets)
+target_link_libraries(todo_list Qt6::Core Qt6::Widgets)
