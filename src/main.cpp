@@ -3,10 +3,24 @@
 #include <QListWidget>
 #include <QVBoxLayout>
 #include <QStyle>
+#include <QPushButton>
+#include <QStackedWidget>
+#include <QLabel>
 #include <iostream>
 #include <fstream>
 #include <nlohmann/json.hpp>
 #include <cstdlib>
+
+void updateTodoCount(QLabel *label, QListWidget* taskList){
+	int cnt = 0;
+	for(int i = 0; i < taskList->count(); i++){
+		QListWidgetItem *item = taskList->item(i);
+		if(item->checkState() != Qt::Checked){
+			cnt++;
+		}
+	}
+	label->setText(QString("Todo %1").arg(cnt));
+}
 
 int main(int argc, char *argv[]) {
 	QApplication app(argc, argv);
@@ -22,11 +36,11 @@ int main(int argc, char *argv[]) {
 
 			int result = system(command.c_str());
 			if(result == 0){
-				std::cout << "File: " << jsonFilePath.toStdString() << " opened in VIM" << std::endl;	
-				return 0;
+			std::cout << "File: " << jsonFilePath.toStdString() << " opened in VIM" << std::endl;
+			return 0;
 			}
 			else{
-				std::cerr << "Failed to open file in VIM." << std::endl;	
+			std::cerr << "Failed to open file in VIM." << std::endl;
 			}
 		}
 		else{
@@ -35,11 +49,11 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	else if(argc > 2){
-		return -1;	
+		return -1;
 	}
 
 	if(!file){
-		std::cerr << "Could not open the file." << std::endl;	
+		std::cerr << "Could not open the file." << std::endl;
 		return -1;
 	}
 
@@ -48,8 +62,8 @@ int main(int argc, char *argv[]) {
 
 	if(data.contains("tasks")){
 		for(const nlohmann::json &task : data["tasks"]){
-			std::cout << "task: " << task["task"] << std::endl;	
-			std::cout << "completed: " << task["completed"] << std::endl;	
+			std::cout << "task: " << task["task"] << std::endl;
+			std::cout << "completed: " << task["completed"] << std::endl;
 		}
 	}
 
@@ -59,8 +73,9 @@ int main(int argc, char *argv[]) {
 	window.setWindowTitle("To-Do App");
 	window.setWindowFlag(Qt::WindowStaysOnTopHint);
 	window.setFixedSize(400, 300);
+
 	window.setStyleSheet(
-		"QWidget {" 
+		"QWidget {"
 		"	font-family: Comic Sans MS;"
 		"	font-size: 20px;"
 		"	background-color: #4c80d4;"
@@ -72,20 +87,30 @@ int main(int argc, char *argv[]) {
 		"}"
 		"QListWidget::item:select {"
 		"	background-color:#ffffff;"
-	       	"}"
+		"}"
 	);
 
-	QVBoxLayout *layout = new QVBoxLayout(&window);
+	//Widgets
+	QVBoxLayout *mainLayout = new QVBoxLayout(&window);
+	QPushButton *switchButton = new QPushButton("Minimize", &window);
+
+	mainLayout->addWidget(switchButton);
+
+	QStackedWidget *layoutList = new QStackedWidget;
+
+	//Layout 1
+	QWidget *maximizedLayoutWidget = new QWidget;
+	QVBoxLayout *maximizedLayout = new QVBoxLayout(maximizedLayoutWidget);
 
 	QListWidget *taskList = new QListWidget(&window);
-	taskList->setSelectionMode(QAbstractItemView::NoSelection);
+	taskList->setSelectionMode(QAbstractItemView::NoSelection);	
 	taskList->setStyleSheet(
 		"QListWidget::item {"
 		"	height: 50px;"
 		"}"
 	);
 
-	layout->addWidget(taskList);
+	maximizedLayout->addWidget(taskList);
 
 	if(data.contains("tasks")){
 		for(const nlohmann::json &task : data["tasks"]){
@@ -97,8 +122,45 @@ int main(int argc, char *argv[]) {
 			taskList->addItem(item);
 		}
 	}
-	
-	window.setLayout(layout);
+
+	layoutList->addWidget(maximizedLayoutWidget);
+
+	//Layout 2
+	QWidget *minimizedLayoutWidget = new QWidget;
+	QVBoxLayout *minimizedLayout = new QVBoxLayout(minimizedLayoutWidget);
+
+	QLabel *todoCount = new QLabel();
+	todoCount->setAlignment(Qt::AlignCenter);
+
+	updateTodoCount(todoCount, taskList);
+	minimizedLayout->addWidget(todoCount);
+
+	layoutList->addWidget(minimizedLayoutWidget);
+
+	QObject::connect(taskList, &QListWidget::itemChanged, [todoCount, taskList](){
+		updateTodoCount(todoCount, taskList);
+	});
+
+	mainLayout->addWidget(layoutList);
+
+	//Button function
+	QObject::connect(switchButton, &QPushButton::clicked, [switchButton, layoutList, &window]() {
+		int currentIndex = layoutList->currentIndex();
+		int nextIndex = (currentIndex + 1) % 2;
+		layoutList->setCurrentIndex(nextIndex);
+
+		if(nextIndex == 0){
+			switchButton->setText("Minimize");
+			window.setFixedSize(400, 300);
+		}
+		else{
+			switchButton->setText("Maximize");
+			window.setFixedSize(150, 100);
+		}
+
+	});
+
+	window.setLayout(mainLayout);
 
 	window.show();
 
